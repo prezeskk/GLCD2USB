@@ -5,7 +5,6 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt), GNU GPL v3 or proprietary (CommercialLicense.txt)
- * This Revision: $Id$
  */
 
 #ifndef __usbconfig_h_included__
@@ -99,7 +98,11 @@
  * of the macros usbDisableAllRequests() and usbEnableAllRequests() in
  * usbdrv.h.
  */
-#define USB_CFG_DRIVER_FLASH_PAGE       0
+#if defined(BOOTLOADER_ADDRESS)
+#	define USB_CFG_DRIVER_FLASH_PAGE       (BOOTLOADER_ADDRESS >> 16)
+#else
+#	define USB_CFG_DRIVER_FLASH_PAGE       0
+#endif
 /* If the device has more than 64 kBytes of flash, define this to the 64 k page
  * where the driver's constants (descriptors) are located. Or in other words:
  * Define this to 1 for boot loaders on the ATMega128.
@@ -203,8 +206,8 @@
  * the macros. See the file USB-IDs-for-free.txt before you assign a name if
  * you use a shared VID/PID.
  */
-/*#define USB_CFG_SERIAL_NUMBER   'N', 'o', 'n', 'e' */
-/*#define USB_CFG_SERIAL_NUMBER_LEN   0 */
+// #define USB_CFG_SERIAL_NUMBER   '2', '0', '1', '2', '0', '7', '2', '1', '0', '1', '0', '0'
+// #define USB_CFG_SERIAL_NUMBER_LEN   12
 /* Same as above for the serial number. If you don't want a serial number,
  * undefine the macros.
  * It may be useful to provide the serial number through other means than at
@@ -301,7 +304,14 @@
 #define USB_CFG_DESCR_PROPS_HID_REPORT              0
 #define USB_CFG_DESCR_PROPS_UNKNOWN                 0
 
-#define usbMsgPtr_t unsigned short  // scalar type yields shortest code
+
+#define usbMsgPtr_t unsigned short
+/* If usbMsgPtr_t is not defined, it defaults to 'uchar *'. We define it to
+ * a scalar type here because gcc generates slightly shorter code for scalar
+ * arithmetics than for pointer arithmetics. Remove this define for backward
+ * type compatibility or define it to an 8 bit type if you use data in RAM only
+ * and all RAM is below 256 bytes (tiny memory model in IAR CC).
+ */
 
 /* ----------------------- Optional MCU Description ------------------------ */
 
